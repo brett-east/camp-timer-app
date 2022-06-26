@@ -1,3 +1,19 @@
 .playSoundCell {
+  grid-column: span 6;
+  border: 1px solid #3b3b3b;
+  background-color: #2b2b2b;
+  color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+}
 
+.dropDown {
+  width: 100%;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  padding: 4px;
+}
+
+.audioPlayer {
+  width: 100%;
 }
