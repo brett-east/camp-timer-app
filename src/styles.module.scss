@@ -1,0 +1,20 @@
+.appWrapper {
+  width: 100%;
+  background-color: #4c4c4c;
+  padding-top: 2rem;
+}
+
+.app {
+  display: grid;
+  max-width: 1200px;
+  margin: 0 auto;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 2rem;
+}
+
+.topRow {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 2rem;
+}
