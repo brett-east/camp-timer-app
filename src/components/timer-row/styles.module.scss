@@ -1,3 +1,27 @@
 .timerRow {
+  display: inline-flex;
+  align-items: center;
+}
 
+.timeWrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.hourField, .minuteField, .amPmField {
+  border: 0;
+  background-color: transparent;
+  font-weight: bold;
+  font-size: 2rem;
+  width: 3rem;
+  color: white;
+}
+.amPmField {
+  width: 3.5rem;
+}
+
+.timeColon {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
 }
