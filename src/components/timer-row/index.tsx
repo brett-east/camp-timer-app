@@ -1,39 +1,76 @@
+import React, { useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
-import React, { useRef, useState } from 'react';
+
 import { SOUNDS, SOUND_PATH } from '../../constants';
 
 import styles from './styles.module.scss';
+import { ITimerRow } from '../../app';
 
 interface TimerRowProps {
-  id: string;
+  timerRow: ITimerRow;
+  time: string;
   addNewRow: () => void;
   removeRow: (id: string) => void;
+  updateRowState: (obj: ITimerRow) => void;
 }
 
 const TimerRow = (props: TimerRowProps) => {
   const {
-    id,
+    timerRow,
+    time,
     addNewRow,
     removeRow,
+    updateRowState,
   } = props;
-  const [selectedSound, setSelectedSound] = useState(`${process.env.PUBLIC_URL}${SOUND_PATH}/first_call.mp3`);
-  const [hourField, setHourField] = useState('');
-  const [minuteField, setMinuteField] = useState('');
-  const [amPmField, setAmPmField] = useState('');
-  const [time, setTime] = useState('');
+
+  const [selectedSound, setSelectedSound] = useState(timerRow.track || `${process.env.PUBLIC_URL}${SOUND_PATH}/first_call.mp3`);
+  const [hourField, setHourField] = useState(timerRow.time ? (timerRow.time?.get('hour') % 12)?.toString().padStart(2, '0') : '');
+  const [minuteField, setMinuteField] = useState(timerRow.time ? timerRow.time?.get('minute')?.toString().padStart(2, '0') : '');
+  const [amPmField, setAmPmField] = useState(timerRow.time ? (timerRow.time?.get('hour') > 12 ? 'pm' : 'am') : '');
+  const [rowTime, setRowTime] = useState<dayjs.Dayjs | null>(timerRow.time);
+  const [playing, setPlaying] = useState(false);
+
+  const audioPlayerRef = useRef<HTMLAudioElement>(null);
 
   const hourRef = useRef<HTMLInputElement>(null);
   const minuteRef = useRef<HTMLInputElement>(null);
   const amPmRef = useRef<HTMLInputElement>(null);
 
-  const handleSetTime = () => {
-    console.log('here');
-
-    if (hourField && minuteField && amPmField) {
-      setTime('');
-      console.log(dayjs(`${hourField}:${minuteField}:${amPmField}`));
+  const handleSetTime = ({ hour, minute, amPm }:
+  { hour: string; minute: string; amPm: string }) => {
+    if (hour && minute && amPm) {
+      console.log('here setting time');
+      const minuteNumber = parseInt(minute, 10);
+      const hourNumber = amPm === 'am' ? parseInt(hour, 10) : parseInt(hour, 10) + 12;
+      const newTime = dayjs().hour(hourNumber).minute(minuteNumber).second(0);
+      setRowTime(newTime);
+      updateRowState({
+        id: timerRow.id,
+        track: selectedSound,
+        time: newTime,
+      });
+    } else {
+      setRowTime(null);
+      updateRowState({
+        id: timerRow.id,
+        track: selectedSound,
+        time: null,
+      });
     }
   }
+
+  if (rowTime?.format('HH:mm:ssa') === time && !playing) {
+    audioPlayerRef.current?.play();
+  }
+
+  useEffect(() => {
+    if (!audioPlayerRef.current?.paused && (audioPlayerRef.current?.currentTime || 0) > 0) {
+      setPlaying(true);
+    } else {
+      setPlaying(false);
+    }
+  }, [time]);
+
 
   const onHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.value.match(/^[0-9]{0,2}$/)) {
@@ -54,7 +91,7 @@ const TimerRow = (props: TimerRowProps) => {
     if (e.target.value.length === 2) {
       minuteRef.current?.focus();
     }
-    handleSetTime();
+    handleSetTime({ hour: e.target.value, minute: minuteField, amPm: amPmField });
   }
 
   const onMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,14 +100,14 @@ const TimerRow = (props: TimerRowProps) => {
     if (!e.target.value.match(/^[0-9]{0,2}$/)) {
       return;
     }
-    if (parseInt(e.target.value, 10) > 60) {
+    if (parseInt(e.target.value, 10) >= 60) {
       return;
     }
     setMinuteField(e.target.value);
+    handleSetTime({ hour: e.target.value, minute: e.target.value, amPm: amPmField });
     if (e.target.value.length === 2) {
       amPmRef.current?.focus();
     }
-    handleSetTime();
   }
 
   const onMinuteKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -86,19 +123,22 @@ const TimerRow = (props: TimerRowProps) => {
     console.log('e.target.value', e.target.value, 'amPmField', amPmField);
     if (e.target.value.toLowerCase() === 'a' && amPmField === 'am') {
       setAmPmField('');
+      handleSetTime({ hour: hourField, minute: minuteField, amPm: '' });
       return;
     }
     if (e.target.value.toLowerCase() === 'p' && amPmField === 'pm') {
       setAmPmField('');
+      handleSetTime({ hour: hourField, minute: minuteField, amPm: '' });
       return;
     }
     if (e.target.value.toLowerCase() === 'a') {
       setAmPmField('am');
+      handleSetTime({ hour: hourField, minute: minuteField, amPm: 'am' });
     }
     if (e.target.value.toLowerCase() === 'p') {
       setAmPmField('pm');
+      handleSetTime({ hour: hourField, minute: minuteField, amPm: 'pm' });
     }
-    handleSetTime();
   }
 
   const onAmPmKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -112,8 +152,18 @@ const TimerRow = (props: TimerRowProps) => {
     }
   }
 
+  const handleTrackChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const track = `${process.env.PUBLIC_URL}${SOUND_PATH}/${e.target.value}`;
+    setSelectedSound(track);
+    updateRowState({
+      id: timerRow.id,
+      track,
+      time: rowTime,
+    });
+  }
+
   return (
-    <div className={styles.timerRow}>
+    <div className={`${styles.timerRow} ${playing ? styles.playing : ''}`}>
       <div className={styles.timeWrapper}>
         <input
           type="text"
@@ -146,9 +196,24 @@ const TimerRow = (props: TimerRowProps) => {
           placeholder="am"
         />
       </div>
+      {rowTime ? (
+        <p
+          className={styles.indicator}
+          title="Ready"
+        >
+          ✅
+        </p>
+      ) : (
+        <p
+          className={styles.indicator}
+          title="Please set hour, minute and am/pm"
+        >
+          🔺
+        </p>
+      )}
       <select
         className={styles.dropDown}
-        onChange={(e) => (setSelectedSound(`${process.env.PUBLIC_URL}${SOUND_PATH}/${e.target.value}`))}
+        onChange={handleTrackChange}
       >
         {SOUNDS.map(sound => (
           <option
@@ -160,6 +225,7 @@ const TimerRow = (props: TimerRowProps) => {
         ))}
       </select>
       <audio
+        ref={audioPlayerRef}
         className={styles.audioPlayer}
         controls
         src={selectedSound}
@@ -167,18 +233,22 @@ const TimerRow = (props: TimerRowProps) => {
         Your browser does not support the
         <code>audio</code> element.
       </audio>
-      <button
-        onClick={addNewRow}
-        className={styles.addButton}
-      >
-        +
-      </button>
-      <button
-        onClick={() => removeRow(id)}
-        className={styles.addButton}
-      >
-        -
-      </button>
+      <div className={styles.buttonWrapper}>
+        <button
+          onClick={() => removeRow(timerRow.id)}
+          className={styles.removeButton}
+          title="Remove row"
+        >
+          -
+        </button>
+        <button
+          onClick={addNewRow}
+          className={styles.addButton}
+          title="Add row"
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 };
