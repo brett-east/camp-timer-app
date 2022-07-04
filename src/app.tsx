@@ -35,7 +35,7 @@ export const useInterval = (
 export const useClock = () => {
   const [time, setTime] = useState<string>('');
   useInterval(() => {
-    const displayTime = dayjs().format('HH:mm:ssa');
+    const displayTime = dayjs().format('hh:mm:ssa');
 
     setTime(displayTime);
   }, 500);
