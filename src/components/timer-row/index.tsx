@@ -60,7 +60,10 @@ const TimerRow = (props: TimerRowProps) => {
   }
 
   if (rowTime?.format('hh:mm:ssa') === time && !playing) {
-    audioPlayerRef.current?.play();
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.currentTime = 0;
+      audioPlayerRef.current.play();
+    }
   }
 
   useEffect(() => {
