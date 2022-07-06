@@ -166,6 +166,9 @@ const App = () => {
           ))}
         </div>
       </div>
+      <p className={styles.versionNumber}>
+        Version: 0.0.3
+      </p>
     </div>
   );
 }
