@@ -39,7 +39,6 @@ const TimerRow = (props: TimerRowProps) => {
   const handleSetTime = ({ hour, minute, amPm }:
   { hour: string; minute: string; amPm: string }) => {
     if (hour && minute && amPm) {
-      console.log('here setting time');
       const minuteNumber = parseInt(minute, 10);
       const hourNumber = amPm === 'am' ? parseInt(hour, 10) : parseInt(hour, 10) + 12;
       const newTime = dayjs().hour(hourNumber).minute(minuteNumber).second(0);
@@ -60,7 +59,7 @@ const TimerRow = (props: TimerRowProps) => {
   }
 
   if (rowTime?.format('hh:mm:ssa') === time && !playing) {
-    if (audioPlayerRef.current) {
+      if (audioPlayerRef.current) {
       audioPlayerRef.current.currentTime = 0;
       audioPlayerRef.current.play();
     }
@@ -83,11 +82,13 @@ const TimerRow = (props: TimerRowProps) => {
     if (e.target.value.match(/^[2-9]{1}$/)) {
       setHourField(`0${e.target.value}`);
       minuteRef.current?.focus();
+      handleSetTime({ hour: e.target.value, minute: minuteField, amPm: amPmField });
       return;
     }
     if (e.target.value.match(/^(10|11|12)$/)) {
       setHourField(e.target.value);
       minuteRef.current?.focus();
+      handleSetTime({ hour: e.target.value, minute: minuteField, amPm: amPmField });
       return;
     }
     setHourField(e.target.value);
@@ -98,8 +99,6 @@ const TimerRow = (props: TimerRowProps) => {
   }
 
   const onMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('minute');
-
     if (!e.target.value.match(/^[0-9]{0,2}$/)) {
       return;
     }
@@ -107,7 +106,7 @@ const TimerRow = (props: TimerRowProps) => {
       return;
     }
     setMinuteField(e.target.value);
-    handleSetTime({ hour: e.target.value, minute: e.target.value, amPm: amPmField });
+    handleSetTime({ hour: hourField, minute: e.target.value, amPm: amPmField });
     if (e.target.value.length === 2) {
       amPmRef.current?.focus();
     }
@@ -123,7 +122,6 @@ const TimerRow = (props: TimerRowProps) => {
   }
 
   const onAmPmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('e.target.value', e.target.value, 'amPmField', amPmField);
     if (e.target.value.toLowerCase() === 'a' && amPmField === 'am') {
       setAmPmField('');
       handleSetTime({ hour: hourField, minute: minuteField, amPm: '' });
@@ -145,8 +143,6 @@ const TimerRow = (props: TimerRowProps) => {
   }
 
   const onAmPmKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    console.log('e', minuteField);
-
     if (amPmField === '') {
       if (e.key === 'Backspace') {
         e.preventDefault();
