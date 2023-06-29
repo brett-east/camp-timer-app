@@ -7,5 +7,3 @@ npm run build
 echo "===============: Deploying ${CLOUDSDK_CORE_PROJECT} app to gcloud"
 
 gcloud app deploy -q app.yaml --ignore-file .gcloudignore
-
-gcloud config configurations activate default
