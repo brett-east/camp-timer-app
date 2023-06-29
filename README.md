@@ -52,3 +52,18 @@ To deploy the app run `./deploy` from the root directory of this project.
 If you're not authenticated you might need to run `gcloud auth login`.
 
 If you get an error trying to activate the brett-east configuration, it might not exist.
+
+There is some wild thing where if you upload the package.json file with the deployment you'll
+get an error like this:
+
+```
+Could not find a required file.
+  Name: index.html
+  Searched in: /workspace/public
+```
+
+This is some bullshit thing where app engine tries to run `npm start`.
+
+You can get around this by adding package.json to the .gcloudignore file.
+
+You can also use the console in gcloud to git clone the repo, then cd into the repo, then run `npm install` then `npm build` then `rm -rf` all files that aren't `build` and `app.yaml` and then run `gcloud app deploy`.
