@@ -1,5 +1,10 @@
 export const SOUNDS = [
   {
+    id: 'announcement',
+    title: 'Announcement',
+    track: 'announcement.mp3',
+  },
+  {
     id: 'firstCall',
     title: 'First call',
     track: 'first_call.mp3',

@@ -59,7 +59,7 @@ const App = () => {
     }
     if (storedTimerRows) {
       const parsedTimerRows = JSON.parse(storedTimerRows);
-      const sanitsedTimerRows = parsedTimerRows.filter((r: ITimerRow) => {
+      const sanitisedTimerRows = parsedTimerRows.filter((r: ITimerRow) => {
         return r.hasOwnProperty('id') && r.hasOwnProperty('track') && r.hasOwnProperty('time')
       }).map((r: ITimerRow) => ({
         id: r.id,
@@ -67,20 +67,37 @@ const App = () => {
         time: r.time ? dayjs(r.time) : r.time,
       }));
 
-      setTimerRowArray(sanitsedTimerRows);
+      setTimerRowArray(sanitisedTimerRows);
     }
   }, []);
 
-  const handleAddNewRow = () => {
-    setTimerRowArray([
-      ...timerRowArray,
+  const handleAddNewRow = (index?: number) => {
+    const id = uuidv4();
+    const newRows = (index && index !== 0) ? ([
+      ...timerRowArray.slice(0, index),
       {
-        id: uuidv4(),
+        id,
         time: null,
         track: '',
       },
-    ])
+      ...timerRowArray.slice(index),
+    ]) : ([
+      ...timerRowArray,
+      {
+        id,
+        time: null,
+        track: '',
+      },
+    ]);
+    setTimerRowArray(newRows);
+    localStorage.setItem(LOCAL_STORAGE_ITEM, JSON.stringify(newRows));
   };
+
+  const handleRemoveRow = (id: string) => {
+    const newRows = timerRowArray.filter(timerRow => timerRow.id !== id);
+    setTimerRowArray(newRows);
+    localStorage.setItem(LOCAL_STORAGE_ITEM, JSON.stringify(newRows));
+  }
 
   const updateRowState = ({ id, time, track }: ITimerRow) => {
     const updatedRows = timerRowArray.map((timerRow) => {
@@ -113,6 +130,13 @@ const App = () => {
     localStorage.setItem(LOCAL_STORAGE_ITEM, JSON.stringify(sortedRows));
   }
 
+  const handleResetButtonClick = () => {
+    const result = window.confirm('Are you sure you want to remove all timers?');
+    if (result) {
+      resetRows();
+    }
+  }
+
   const resetRows = () => {
     setTimerRowArray([]);
     localStorage.setItem(LOCAL_STORAGE_ITEM, '[]');
@@ -134,7 +158,7 @@ const App = () => {
             </p>
             <div className={styles.buttonSection}>
               <button
-                onClick={resetRows}
+                onClick={handleResetButtonClick}
                 className={styles.resetButton}
               >
                 Reset
@@ -146,7 +170,7 @@ const App = () => {
                 Sort by time
               </button>
               <button
-                onClick={handleAddNewRow}
+                onClick={() => handleAddNewRow()}
                 className={styles.addButton}
                 title="Add row"
               >
@@ -154,14 +178,14 @@ const App = () => {
               </button>
             </div>
           </div>
-          {timerRowArray.map(timerRow => (
+          {timerRowArray.map((timerRow, index) => (
             <TimerRow
               updateRowState={updateRowState}
               key={timerRow.id}
               timerRow={timerRow}
               time={time}
-              addNewRow={handleAddNewRow}
-              removeRow={() => setTimerRowArray(timerRowArray.filter(id => id !== timerRow))}
+              addNewRow={() => handleAddNewRow(index + 1)}
+              removeRow={() => handleRemoveRow(timerRow.id)}
             />
           ))}
         </div>

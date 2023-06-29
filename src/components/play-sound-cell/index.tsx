@@ -8,7 +8,7 @@ interface PlaySoundCellProps {
 }
 
 const PlaySoundCell = (props: PlaySoundCellProps) => {
-  const [selectedSound, setSelectedSound] = useState(`${process.env.PUBLIC_URL}${SOUND_PATH}/first_call.mp3`);
+  const [selectedSound, setSelectedSound] = useState(`${process.env.PUBLIC_URL}${SOUND_PATH}/announcement.mp3`);
 
   return (
     <div className={styles.playSoundCell}>

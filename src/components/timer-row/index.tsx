@@ -6,6 +6,16 @@ import { SOUNDS, SOUND_PATH } from '../../constants';
 import styles from './styles.module.scss';
 import { ITimerRow } from '../../app';
 
+const convertHourIntoSimpleHour = (hour: number) => {
+  if (hour === 12) {
+    return '12';
+  }
+  if (hour === 0) {
+    return '12';
+  }
+  return (hour % 12).toString().padStart(2, '0');
+}
+
 interface TimerRowProps {
   timerRow: ITimerRow;
   time: string;
@@ -24,9 +34,9 @@ const TimerRow = (props: TimerRowProps) => {
   } = props;
 
   const [selectedSound, setSelectedSound] = useState(timerRow.track || `${process.env.PUBLIC_URL}${SOUND_PATH}/first_call.mp3`);
-  const [hourField, setHourField] = useState(timerRow.time ? (timerRow.time?.get('hour') % 12)?.toString().padStart(2, '0') : '');
+  const [hourField, setHourField] = useState(timerRow.time ? (convertHourIntoSimpleHour(timerRow.time?.get('hour'))) : '');
   const [minuteField, setMinuteField] = useState(timerRow.time ? timerRow.time?.get('minute')?.toString().padStart(2, '0') : '');
-  const [amPmField, setAmPmField] = useState(timerRow.time ? (timerRow.time?.get('hour') > 12 ? 'pm' : 'am') : '');
+  const [amPmField, setAmPmField] = useState(timerRow.time ? (timerRow.time?.get('hour') >= 12 ? 'pm' : 'am') : '');
   const [rowTime, setRowTime] = useState<dayjs.Dayjs | null>(timerRow.time);
   const [playing, setPlaying] = useState(false);
 
@@ -39,8 +49,17 @@ const TimerRow = (props: TimerRowProps) => {
   const handleSetTime = ({ hour, minute, amPm }:
   { hour: string; minute: string; amPm: string }) => {
     if (hour && minute && amPm) {
-      const minuteNumber = parseInt(minute, 10);
-      const hourNumber = amPm === 'am' ? parseInt(hour, 10) : parseInt(hour, 10) + 12;
+      const minuteNumber = parseFloat(minute);
+      let hourNumber = amPm === 'am' ? parseFloat(hour) : parseFloat(hour) + 12;
+      if (hour === '12') { // handle a thing where dayjs doesn't like 12am or 24pm
+        if (amPm === 'am') {
+          hourNumber = 0;
+        }
+        if (amPm === 'pm') {
+          hourNumber = 12;
+        }
+      }
+
       const newTime = dayjs().hour(hourNumber).minute(minuteNumber).second(0);
       setRowTime(newTime);
       updateRowState({
@@ -213,6 +232,7 @@ const TimerRow = (props: TimerRowProps) => {
       <select
         className={styles.dropDown}
         onChange={handleTrackChange}
+        defaultValue={selectedSound?.split('/').pop()}
       >
         {SOUNDS.map(sound => (
           <option
