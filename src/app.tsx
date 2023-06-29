@@ -191,7 +191,7 @@ const App = () => {
         </div>
       </div>
       <p className={styles.versionNumber}>
-        Version: 0.0.4
+        Version: 1.0.0
       </p>
     </div>
   );
