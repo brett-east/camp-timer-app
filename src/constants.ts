@@ -34,6 +34,11 @@ export const SOUNDS = [
     title: 'Taps',
     track: 'taps.mp3',
   },
+  {
+    id: 'ymca',
+    title: 'YMCA',
+    track: 'ymca.mp3',
+  },
 ];
 
 export const SOUND_PATH = '/sounds';
