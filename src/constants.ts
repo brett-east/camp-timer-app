@@ -30,6 +30,11 @@ export const SOUNDS = [
     track: 'sticks.mp3',
   },
   {
+    id: 'supermodel',
+    title: 'Supermodel',
+    track: 'supermodel.mp3',
+  },
+  {
     id: 'taps',
     title: 'Taps',
     track: 'taps.mp3',
