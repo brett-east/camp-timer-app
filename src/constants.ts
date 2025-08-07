@@ -5,6 +5,11 @@ export const SOUNDS = [
     track: 'announcement.mp3',
   },
   {
+    id: 'bellTrain',
+    title: 'Bell Train',
+    track: 'bell_train.mp3',
+  },
+  {
     id: 'firstCall',
     title: 'First call',
     track: 'first_call.mp3',
